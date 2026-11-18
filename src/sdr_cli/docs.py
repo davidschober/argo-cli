@@ -78,6 +78,11 @@ DOCS: dict[str, list[tuple[str, str]]] = {
     ],
 }
 
+DOCS["accession.file-manifest"] = [
+    sdr(1812791947, "Accessioning complex content using a file manifest"),
+    sdr(1812791949, "Accessioning images with captions (labels)"),
+] + DOCS["accession"]
+
 # Shown in `sdr edit --help` and appended to every edit panel.
 EDIT_COMMON = [
     sdr(1638465944, "About Argo bulk actions"),

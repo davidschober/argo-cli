@@ -24,6 +24,7 @@ Add `--fast` or set `SDR_FAST=1` to skip the fake delays.
 |---|---|---|
 | `sdr register items.csv` | Bulk action: Register druids (via CSV) | Registering items using a bulk action CSV |
 | `sdr accession manifest.csv --project-name … --content-type … --staging …` | Preassembly webform → discovery report → Preassembly run | Filling out the Preassembly webform |
+| `sdr accession … --file-manifest file_manifest.csv` | Preassembly with a file manifest (complex content and media) | Accessioning complex content using a file manifest |
 | `sdr edit ocr <druids> --lang English` | Bulk action: Text extraction | Running OCR on accessioned items |
 | `sdr edit rights <druids> --view … --download …` | Bulk action: Update rights | Changing an item's access rights |
 | `sdr edit collection <druids> --to <druid>` | Bulk action: Update collection | Changing an item's collection |
@@ -71,6 +72,28 @@ sdr edit content-type box33.txt --to book       # second edit, versions still op
   Batches over 500 items or 300 GB get a warning.
 - Always runs a discovery report before the Preassembly run (`--discovery-only` stops after the report).
 
+**accession with a file manifest** ([complex content page](https://consul.stanford.edu/pages/viewpage.action?pageId=1812791947))
+
+For media (where it's required), 3D, web archives, or images with custom labels, pass
+`--file-manifest file_manifest.csv`. The CLI prints a resource tree showing how files group into labeled
+resources and which files go on the Purl versus preservation only. It also checks:
+- `druid` is the first column, and all required columns are present
+  (`druid, filename, resource_label, sequence, publish, shelve, preserve, resource_type`).
+- `publish`, `shelve`, and `preserve` are yes/no, and `publish` equals `shelve`.
+- Each druid's files are listed together; sequences start at 1 and climb with no gaps (1,1,2,3).
+- Files in one resource share the same label and type.
+- `role` is one of transcription, caption, thumbnail, annotations, derivative, master.
+  Other values are ignored, so they get a warning.
+- Captions are `.vtt`; `file_language` is a BCP-47 code; `.md5` checksum files aren't listed.
+- Every druid in `manifest.csv` appears in the file manifest, and vice versa. Folders must be named after druids.
+- Preserve/shelve/publish stays `default`, because the manifest decides per file.
+
+```bash
+sdr accession examples/accession_with_file_manifest.csv --project-name oral_hist_2026 \
+    --content-type media --staging /dor/staging/oralhist --file-manifest examples/file_manifest.csv
+# examples/file_manifest_with_errors.csv shows 8 errors and 1 warning
+```
+
 **edit ocr** ([OCR page](https://consul.stanford.edu/pages/viewpage.action?pageId=1785071120))
 - Default languages are English, French, Spanish, German, and Russian.
 - Warns when there are more than 100 druids per bulk action and shows how many batches it would split into.
@@ -94,6 +117,7 @@ src/sdr_cli/
   cli.py                 # click group and global --fast flag
   ui.py                  # progress bars, "would have" panel, druid parsing
   docs.py                # Consul page IDs and Argo source links (one place to update)
+  file_manifest.py       # file_manifest.csv checks and resource tree preview
   commands/{register,accession,edit,find}.py
 examples/                # sample inputs, including register_with_errors.csv
 ```

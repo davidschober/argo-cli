@@ -15,6 +15,7 @@ import click
 from rich.syntax import Syntax
 from rich.table import Table
 
+from ..file_manifest import load_and_validate, resource_tree
 from ..ui import collect_druids, console, fake_progress, fake_steps, would_have
 
 CONTENT_TYPES = ["image", "book", "document", "file", "geo", "media", "3d", "map", "webarchive-seed"]
@@ -44,7 +45,9 @@ def _read_targets(targets: tuple[str, ...]) -> list[tuple[str, str]]:
               help="Must match the content type the druids were registered with.")
 @click.option("--staging", required=True,
               help="Staging location: /{storageMount}/path on an approved mount, or a Globus link.")
-@click.option("--file-manifest", is_flag=True, help="A file_manifest.csv is supplied (required for media).")
+@click.option("--file-manifest", type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="file_manifest.csv for complex content: labels, order, roles, purl vs preservation-only. "
+                   "Required for media.")
 @click.option("--ocr", is_flag=True, help="Auto-generate OCR (image, book, document only).")
 @click.option("--have-ocr", is_flag=True, help="ALTO XML files are already staged next to the images.")
 @click.option("--lang", "languages", multiple=True, help="OCR language, up to 8. Default: " + ", ".join(DEFAULT_LANGS))
@@ -56,12 +59,20 @@ def accession(targets, project_name, content_type, staging, file_manifest, ocr, 
 
     TARGETS are druids, a .txt with one druid per line, or a .csv with a
     'druid' column. A CSV with 'druid,object' columns is used as the
-    manifest, so folders don't have to be named after druids.
+    manifest, so folders don't have to be named after druids (unless
+    you use a file manifest).
 
     \b
-    Example:
+    Examples:
+      # simple book batch with OCR
       sdr accession examples/accession.csv --project-name rumsey_batch_7 \\
           --content-type book --staging /dor/staging/rumsey/batch7 --ocr --lang English
+
+    \b
+      # complex media: file manifest controls resources, labels, order, purl vs preservation
+      sdr accession examples/accession_with_file_manifest.csv --project-name oral_hist_2026 \\
+          --content-type media --staging /dor/staging/oralhist \\
+          --file-manifest examples/file_manifest.csv
     """
     # Webform rules, checked up front.
     problems = []
@@ -70,7 +81,9 @@ def accession(targets, project_name, content_type, staging, file_manifest, ocr, 
     if not (staging.startswith("/") or "globus" in staging):
         problems.append("--staging must be /{storageMount}/... on an approved content mount, or a Globus link")
     if content_type == "media" and not file_manifest:
-        problems.append("media content always needs a file manifest (--file-manifest)")
+        problems.append("media content always needs a file manifest (--file-manifest file_manifest.csv)")
+    if file_manifest and pss != "default":
+        problems.append("with a file manifest, leave preserve/shelve/publish as default (the manifest decides per file)")
     if ocr and content_type not in OCR_TYPES:
         problems.append(f"OCR isn't offered for {content_type} (only image, book, document)")
     if ocr and have_ocr:
@@ -84,6 +97,13 @@ def accession(targets, project_name, content_type, staging, file_manifest, ocr, 
         raise click.UsageError("\n  ".join(["Preassembly webform would reject this:"] + problems))
 
     pairs = _read_targets(targets)
+    fm = None
+    if file_manifest:
+        renamed = [(d, o) for d, o in pairs if d != o]
+        if renamed:
+            raise click.UsageError(f"with a file manifest, folders must be named after druids; "
+                                   f"'{renamed[0][1]}' is used for {renamed[0][0]}")
+        fm = load_and_validate(file_manifest, [d for d, _ in pairs])
     console.rule(f"[bold]sdr accession[/] · {project_name} · {len(pairs)} object(s) · {content_type}")
 
     manifest = "druid,object\n" + "\n".join(f"{d},{o}" for d, o in pairs)
@@ -91,12 +111,26 @@ def accession(targets, project_name, content_type, staging, file_manifest, ocr, 
     console.print(Syntax(manifest if len(pairs) <= 8 else "\n".join(manifest.splitlines()[:9]) + "\n…", "text",
                          theme="ansi_dark", line_numbers=False))
 
+    if fm:
+        console.print()
+        console.print(resource_tree(fm))
+        for w in fm.warnings:
+            console.print(f"  [yellow]⚠ {w}[/]")
+        if fm.errors:
+            console.print(f"\n[bold red]✗ file_manifest.csv has {len(fm.errors)} problem(s); "
+                          f"the discovery report would fail:[/]")
+            for e in fm.errors:
+                console.print(f"  [red]•[/] {e}")
+            raise SystemExit(1)
+        console.print("[bold green]✓ file_manifest.csv passes local checks[/]\n")
+
     fake_steps([
         f"Resolving staging location {staging}",
         "Checking manifest.csv: header, no blank lines, no repeated druids",
         "Checking each druid is registered with content type " + content_type,
         "Matching manifest rows to staged folders",
-    ])
+    ] + (["Checking every staged file is listed in file_manifest.csv (and vice versa)",
+          "Verifying any .md5 sidecar checksums"] if fm else []))
     console.print("\n[bold]Discovery report[/]")
     fake_progress("Discovery report", [d for d, _ in pairs], per_item=(0.05, 0.2))
 
@@ -114,7 +148,7 @@ def accession(targets, project_name, content_type, staging, file_manifest, ocr, 
     langs = list(languages) or DEFAULT_LANGS
     actions = [
         f"Filled in the Preassembly webform: project [cyan]{project_name}[/], content type [bold]{content_type}[/], "
-        f"staging [cyan]{staging}[/], file manifest: {'yes' if file_manifest else 'no'}, "
+        f"staging [cyan]{staging}[/], file manifest: {'yes' if fm else 'no'}, "
         f"preserve/shelve/publish: {pss}.",
         "Ran a [bold]Discovery Report[/] job to catch problems (missing folders, bad filenames, druids not registered) "
         "before anything is sent to SDR.",
@@ -125,6 +159,12 @@ def accession(targets, project_name, content_type, staging, file_manifest, ocr, 
                        "and starts accessionWF for each druid.")
     if ocr:
         actions.append(f"Requested OCR during accessioning in: [cyan]{', '.join(langs)}[/].")
+    if fm:
+        n_res = len({(r["druid"], r["sequence"]) for r in fm.rows})
+        n_dark = sum(r["publish"].lower() == "no" for r in fm.rows)
+        actions.append(f"{'Checked' if discovery_only else 'Built'} structural metadata from [cyan]{file_manifest.name}[/]: {len(fm.rows)} files in "
+                          f"{n_res} labeled resources, in manifest order. {n_dark} file(s) go to preservation only "
+                          "and stay off the Purl. Roles (thumbnail, caption, transcription) are set per file.")
     if have_ocr:
         actions.append("Attached the staged ALTO XML files as transcriptions (one per image, matching filenames).")
     actions.append("Sent you an email when each job finished. Large jobs (TBs) can take days.")
@@ -138,4 +178,4 @@ def accession(targets, project_name, content_type, staging, file_manifest, ocr, 
     if pss == "all":
         notes.append("[yellow]'all' publishes every file on the Purl. Check with the SDR team if unsure.[/]")
 
-    would_have("accession", "Accessioning (Preassembly)", actions, notes=notes)
+    would_have("accession.file-manifest" if fm else "accession", "Accessioning (Preassembly)", actions, notes=notes)
