@@ -1,0 +1,5 @@
+administrative_policy_object,collection,initial_workflow,content_type,reading_order,source_id,folio_instance_hrid,barcode,title,rights_view,rights_download,rights_location,project_name,tags,tags,tickets
+druid:hv992ry2431,druid:bc778pm9866,registrationWF,image,,maps:rumsey-0001,,36105000000001,"Map of the San Francisco Peninsula, 1895",world,world,,Rumsey Maps,Format : Map,DPG : Batch 7,SDRO-123
+druid:hv992ry2431,druid:bc778pm9866,registrationWF,book,right-to-left,maps:rumsey-0002,a4647701,36105000000002,,stanford,none,,Rumsey Maps,Format : Atlas,,SDRO-123
+druid:hv992ry2431,,registrationWF,document,,sul:SC0001_b03_f02,,,"Commencement program, 1924",location-based,location-based,spec,,,,
+druid:hv992ry2431,,goobiWF,image,,oralhist:1968-07,,,"Oral history: Class of 1968, photo",stanford,stanford,,,,,

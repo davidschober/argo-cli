@@ -1,0 +1,7 @@
+administrative_policy_object,initial_workflow,content_type,source_id,title,rights_view,rights_download,rights_location,tags,tickets
+hv992ry2431,registrationWF,image,maps:bad-0001,APO missing druid: prefix,world,world,,,
+druid:hv992ry2431,,map,maps:bad-0002,No initial workflow,world,world,,,
+druid:hv992ry2431,registrationWF,Image,maps-bad-0003,Wrong case and bad source id,world,world,,,
+druid:hv992ry2431,registrationWF,document,maps:bad-0004,,world,world,,,
+druid:hv992ry2431,registrationWF,document,maps:bad-0005,Location without location,location-based,none,,,
+druid:hv992ry2431,registrationWF,image,maps:bad-0005,Duplicate source id + bad tag + JIRA prefix,world,world,,Maps,JIRA-SDRO-9
