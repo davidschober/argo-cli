@@ -1,6 +1,6 @@
 # argo: a POC bulk CLI for SDR / Argo
 
-A proof-of-concept command-line tool for Stanford Digital Repository power users, to support discussion.
+An interactive mockup-up of a command-line tool for Stanford Digital Repository power users, to support discussion.
 It shows the intended commands and workflow, but **no command contacts SDR or Argo.** Each command:
 
 1. checks its input against the rules in the [SDR User Guide](https://consul.stanford.edu/pages/viewpage.action?pageId=1785069828),
