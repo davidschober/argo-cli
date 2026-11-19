@@ -1,0 +1,13 @@
+druid,filename,resource_label,sequence,publish,shelve,preserve,resource_type,role,file_language
+bb111cc2222,bb111cc2222_interview_pm.mov,Video file,1,no,no,yes,video,,
+bb111cc2222,bb111cc2222_interview_sl.mp4,Video file,1,yes,yes,yes,video,,
+bb111cc2222,bb111cc2222_interview_thumb.jp2,Video file,1,yes,yes,yes,video,thumbnail,
+bb111cc2222,bb111cc2222_interview_en.vtt,Video file,1,yes,yes,yes,video,caption,en
+bb111cc2222,bb111cc2222_interview_es.vtt,Video file,1,yes,yes,yes,video,caption,es
+bb111cc2222,bb111cc2222_release.pdf,Release form,2,no,no,yes,file,,
+bb111cc2222,bb111cc2222_transcript.pdf,Transcript,3,yes,yes,yes,file,transcription,en
+dd333ff4444,dd333ff4444_side_a_pm.wav,Side A,1,no,no,yes,audio,,
+dd333ff4444,dd333ff4444_side_a_sl.m4a,Side A,1,yes,yes,yes,audio,,
+dd333ff4444,dd333ff4444_side_b_pm.wav,Side B,2,no,no,yes,audio,,
+dd333ff4444,dd333ff4444_side_b_sl.m4a,Side B,2,yes,yes,yes,audio,,
+dd333ff4444,dd333ff4444_label.jpg,Disc label,3,yes,yes,yes,image,,

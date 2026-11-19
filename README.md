@@ -1,4 +1,4 @@
-# sdr: a POC bulk CLI for SDR / Argo
+# argo: a POC bulk CLI for SDR / Argo
 
 A proof-of-concept command-line tool for Stanford Digital Repository power users, to support discussion.
 It shows the intended commands and workflow, but **no command contacts SDR or Argo.** Each command:
@@ -8,31 +8,61 @@ It shows the intended commands and workflow, but **no command contacts SDR or Ar
 3. explains what a real run would have done, which Argo bulk action or Preassembly step it maps to,
    and links to the relevant SDR User Guide pages.
 
-## Quick start
+## Try it with uvx (no install)
+
+If you have [uv](https://docs.astral.sh/uv/getting-started/installation/), you can run the CLI straight from
+GitHub. Nothing to clone, no virtualenv to set up:
 
 ```bash
-uv sync
-uv run sdr --help
-uv run sdr register examples/register.csv
+uvx --from git+https://github.com/davidschober/argo-cli argo --help
+uvx --from git+https://github.com/davidschober/argo-cli argo find --hrid 4647701
 ```
 
-Add `--fast` or set `SDR_FAST=1` to skip the fake delays.
+Always include `--from git+https://…`. A plain `uvx argo` would look for a different package on PyPI.
+
+To get a plain `argo` command you can call from anywhere:
+
+```bash
+uv tool install git+https://github.com/davidschober/argo-cli
+argo --help
+uv tool upgrade argo-cli      # pick up new changes later
+```
+
+The sample input files live in `examples/` in this repo. To try commands with them, clone the repo,
+or download the files you need.
+
+## Quick start (from a clone)
+
+```bash
+git clone https://github.com/davidschober/argo-cli && cd argo-cli
+uv sync
+uv run argo --help
+uv run argo register examples/register.csv
+```
+
+Add `--fast` or set `ARGO_FAST=1` to skip the fake delays.
+
+Run the tests (about 55 smoke tests, under a second):
+
+```bash
+uv run pytest
+```
 
 ## Commands
 
 | Command | Maps to | SDR User Guide page |
 |---|---|---|
-| `sdr register items.csv` | Bulk action: Register druids (via CSV) | Registering items using a bulk action CSV |
-| `sdr accession manifest.csv --project-name … --content-type … --staging …` | Preassembly webform → discovery report → Preassembly run | Filling out the Preassembly webform |
-| `sdr accession … --file-manifest file_manifest.csv` | Preassembly with a file manifest (complex content and media) | Accessioning complex content using a file manifest |
-| `sdr edit ocr <druids> --lang English` | Bulk action: Text extraction | Running OCR on accessioned items |
-| `sdr edit rights <druids> --view … --download …` | Bulk action: Update rights | Changing an item's access rights |
-| `sdr edit collection <druids> --to <druid>` | Bulk action: Update collection | Changing an item's collection |
-| `sdr edit content-type <druids> --to book` | Bulk action: Update content type | Editing content type and resource type |
-| `sdr edit tags tags.csv` | Bulk action: Import tags | Tagging and remediating tags |
-| `sdr edit descriptive --export / --validate / --import` | Bulk actions: Download / Validate / Upload descriptive metadata spreadsheet | Editing Cocina descriptive metadata |
-| `sdr find "query" [facets] --format druids` | Argo search and facets | Searching and filtering in Argo |
-| `sdr status <druids>` | Processing Status facet and workflow grid | Opening and closing object versions |
+| `argo register items.csv` | Bulk action: Register druids (via CSV) | Registering items using a bulk action CSV |
+| `argo accession manifest.csv --project-name … --content-type … --staging …` | Preassembly webform → discovery report → Preassembly run | Filling out the Preassembly webform |
+| `argo accession … --file-manifest file_manifest.csv` | Preassembly with a file manifest (complex content and media) | Accessioning complex content using a file manifest |
+| `argo edit ocr <druids> --lang English` | Bulk action: Text extraction | Running OCR on accessioned items |
+| `argo edit rights <druids> --view … --download …` | Bulk action: Update rights | Changing an item's access rights |
+| `argo edit collection <druids> --to <druid>` | Bulk action: Update collection | Changing an item's collection |
+| `argo edit content-type <druids> --to book` | Bulk action: Update content type | Editing content type and resource type |
+| `argo edit tags tags.csv` | Bulk action: Import tags | Tagging and remediating tags |
+| `argo edit descriptive --export / --validate / --import` | Bulk actions: Download / Validate / Upload descriptive metadata spreadsheet | Editing Cocina descriptive metadata |
+| `argo find "query" [facets] --format druids` | Argo search and facets | Searching and filtering in Argo |
+| `argo status <druids>` | Processing Status facet and workflow grid | Opening and closing object versions |
 
 Wherever a command takes `<druids>`, you can pass:
 - individual druids (the `druid:` prefix is optional),
@@ -43,10 +73,10 @@ Wherever a command takes `<druids>`, you can pass:
 That makes commands composable:
 
 ```bash
-sdr find --project "Piano rolls" --status accessioned --format druids | sdr edit ocr - --lang English
-sdr find --source-id sul:M1994_b033 --format druids > box33.txt
-sdr edit rights box33.txt --view world --download world --keep-open
-sdr edit content-type box33.txt --to book       # second edit, versions still open
+argo find --project "Piano rolls" --status accessioned --format druids | argo edit ocr - --lang English
+argo find --source-id sul:M1994_b033 --format druids > box33.txt
+argo edit rights box33.txt --view world --download world --keep-open
+argo edit content-type box33.txt --to book       # second edit, versions still open
 ```
 
 ## What the CLI checks, per the SDR User Guide
@@ -89,7 +119,7 @@ resources and which files go on the Purl versus preservation only. It also check
 - Preserve/shelve/publish stays `default`, because the manifest decides per file.
 
 ```bash
-sdr accession examples/accession_with_file_manifest.csv --project-name oral_hist_2026 \
+argo accession examples/accession_with_file_manifest.csv --project-name oral_hist_2026 \
     --content-type media --staging /dor/staging/oralhist --file-manifest examples/file_manifest.csv
 # examples/file_manifest_with_errors.csv shows 8 errors and 1 warning
 ```
@@ -113,14 +143,32 @@ sdr accession examples/accession_with_file_manifest.csv --project-name oral_hist
 ## Layout
 
 ```
-src/sdr_cli/
+src/argo_cli/
   cli.py                 # click group and global --fast flag
   ui.py                  # progress bars, "would have" panel, druid parsing
   docs.py                # Consul page IDs and Argo source links (one place to update)
   file_manifest.py       # file_manifest.csv checks and resource tree preview
   commands/{register,accession,edit,find}.py
-examples/                # sample inputs, including register_with_errors.csv
+tests/test_cli.py        # smoke tests: every command and every example file
+examples/                # sample inputs (see below)
 ```
+
+## Example files
+
+| File | Use with | Shows |
+|---|---|---|
+| `druids.txt`, `druids.csv` | any `<druids>` argument | a druid list as text (one per line) or as a CSV with a `druid` column |
+| `druids_with_errors.txt` | any `<druids>` argument | the warning for values that don't look like druids |
+| `register.csv` | `register` | a clean batch: repeated `tags` columns, FOLIO HRID instead of a title, location-based rights |
+| `register_minimal.csv` | `register --apo … --workflow … --content-type …` | shared settings passed as flags instead of columns |
+| `register_with_errors.csv` | `register --validate-only` | one row per common mistake |
+| `accession.csv` | `accession` | a simple `druid,object` manifest |
+| `accession_renamed_folders.csv` | `accession` | staged folders that aren't named after druids |
+| `accession_with_file_manifest.csv` + `file_manifest.csv` | `accession --content-type media --file-manifest …` | video and audio with captions, a transcript, and preservation-only masters |
+| `accession_images_with_labels.csv` + `file_manifest_images_with_labels.csv` | `accession --content-type image --file-manifest …` | images with custom labels and a preservation-only PDF |
+| `file_manifest_with_errors.csv` | `accession … --file-manifest …` | 8 errors and 1 warning |
+| `tags.csv` | `edit tags` | `druid,tag,tag,…` rows |
+| `descriptive.csv` | `edit descriptive --validate / --import` | a small descriptive metadata spreadsheet |
 
 ## Open questions for discussion
 
@@ -129,7 +177,7 @@ examples/                # sample inputs, including register_with_errors.csv
 - **Accessioning paths.** Preassembly is modeled here. Is there a use case for Goobi or the SDR API deposit
   flow from the CLI?
 - **Job handling.** Bulk actions and Preassembly run in the background and email when done. Should the CLI
-  return a job ID with `sdr jobs watch <id>`, or block until finished?
+  return a job ID with `argo jobs watch <id>`, or block until finished?
 - **Safety rails.** Should the CLI split OCR jobs into batches of 100 automatically, check controlled
   values against live APO and collection lists, and look for already-registered source IDs before
   registering (the guide asks users to check for duplicates)?

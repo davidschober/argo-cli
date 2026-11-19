@@ -1,4 +1,4 @@
-"""sdr find / sdr status: locate content and check where it is in the pipeline.
+"""argo find / argo status: locate content and check where it is in the pipeline.
 
 Follows SDR User Guide > Finding SDR content > Searching and filtering in Argo.
 """
@@ -58,13 +58,13 @@ def find(query, project, tags, ticket, collection, apo, content_type, object_typ
 
     \b
     Examples:
-      sdr find "Map of the San Francisco Peninsula"
-      sdr find --source-id sul:M1994_b033                 # everything in box 33
-      sdr find --hrid 4647701                             # becomes a4647701
-      sdr find --project "Piano rolls" --status registered --format druids > todo.txt
-      sdr find --collection druid:bc778pm9866 --format druids | sdr edit ocr -
+      argo find "Map of the San Francisco Peninsula"
+      argo find --source-id sul:M1994_b033                 # everything in box 33
+      argo find --hrid 4647701                             # becomes a4647701
+      argo find --project "Piano rolls" --status registered --format druids > todo.txt
+      argo find --collection druid:bc778pm9866 --format druids | argo edit ocr -
     """
-    if fmt == "druids":  # keep stdout clean for piping
+    if fmt in ("druids", "csv"):  # keep stdout clean for piping and redirects
         ui.console = ui.Console(stderr=True)
     out = ui.console
 
@@ -78,7 +78,7 @@ def find(query, project, tags, ticket, collection, apo, content_type, object_typ
         if fixed:
             tips.append(f"Added the 'a' prefix: SearchWorks shows numeric IDs, but Argo indexes them as {hrid}.")
     if query and " " in query and not query.startswith('"'):
-        tips.append(f'For an exact title, quote it: sdr find \'"{query}"\'')
+        tips.append(f'For an exact title, quote it: argo find \'"{query}"\'')
 
     facets = {
         "Project": project, "Tag": " AND ".join(tags) or None, "Ticket": ticket, "Collection": collection,
@@ -92,7 +92,7 @@ def find(query, project, tags, ticket, collection, apo, content_type, object_typ
     facets = {k: v for k, v in facets.items() if v}
     q = " ".join(q_parts) or "*"
 
-    out.rule(f"[bold]sdr find[/] {q}")
+    out.rule(f"[bold]argo find[/] {q}")
     for k, v in facets.items():
         out.print(f"  [dim]facet[/] {k}: [cyan]{v}[/]")
     fake_steps(["Building Solr query", "Querying Argo index"], delay=(0.2, 0.5))
@@ -147,7 +147,7 @@ def status(targets):
     """Show processing status, version, and accessionWF progress."""
     druids = collect_druids(targets)
     out = ui.console
-    out.rule(f"[bold]sdr status[/] · {len(druids)} object(s)")
+    out.rule(f"[bold]argo status[/] · {len(druids)} object(s)")
     t = Table(header_style="bold")
     t.add_column("Druid", no_wrap=True)
     t.add_column("Status")

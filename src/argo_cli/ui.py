@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import random
 import re
+import sys
 import time
 from pathlib import Path
 
@@ -55,8 +56,8 @@ def collect_druids(targets: tuple[str, ...]) -> list[str]:
 
     druids: list[str] = []
     for t in targets:
-        if t == "-":  # read druids piped in on stdin, e.g. from `sdr find --format druids`
-            druids += [ln.strip() for ln in click.get_text_stream("stdin") if ln.strip()]
+        if t == "-":  # read druids piped in on stdin, e.g. from `argo find --format druids`
+            druids += [ln.strip() for ln in sys.stdin if ln.strip()]
             continue
         p = Path(t)
         if p.is_file():

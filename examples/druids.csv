@@ -1,0 +1,4 @@
+druid,source_id,note
+druid:bb111cc2222,maps:rumsey-0001,any CSV with a druid column works
+druid:dd333ff4444,maps:rumsey-0002,other columns are ignored
+gg555hh6666,sul:SC0001_b03_f02,prefix optional here too

@@ -1,4 +1,4 @@
-"""sdr register: bulk-register items from a CSV.
+"""argo register: bulk-register items from a CSV.
 
 Mirrors the "Register druids (via CSV)" bulk action. See
 SDR User Guide > Registration > Registering items using a bulk action CSV.
@@ -115,7 +115,7 @@ def register(csv_file, apo, collection, workflow, content_type, project, descrip
       folio_instance_hrid, barcode, project_name, tags (repeatable),
       tickets (repeatable, e.g. SDRO-123)
 
-    Example:  sdr register examples/register.csv --apo druid:hv992ry2431
+    Example:  argo register examples/register.csv --apo druid:hv992ry2431
     """
     opts = {
         "administrative_policy_object": apo,
@@ -132,7 +132,7 @@ def register(csv_file, apo, collection, workflow, content_type, project, descrip
     headers, data = raw[0], raw[1:]
     rows = [dict(zip(headers, r)) for r in data]  # repeating columns: last value wins here; checked separately
 
-    console.rule(f"[bold]sdr register[/] · {csv_file.name} · {len(rows)} row(s)")
+    console.rule(f"[bold]argo register[/] · {csv_file.name} · {len(rows)} row(s)")
     fake_steps(["Parsing CSV", "Checking column headers", "Validating rows against registration rules",
                 "Checking for duplicate source IDs"], delay=(0.2, 0.5))
 
@@ -168,7 +168,7 @@ def register(csv_file, apo, collection, workflow, content_type, project, descrip
     console.print(table)
 
     notes = [
-        "Then stage files and run [bold]sdr accession[/] with the new druids (Preassembly needs registered druids).",
+        "Then stage files and run [bold]argo accession[/] with the new druids (Preassembly needs registered druids).",
         "In a large batch, Argo's index may take a while before every new item shows as registered.",
     ]
     if len(rows) <= FORM_LIMIT:

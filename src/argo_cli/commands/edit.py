@@ -1,4 +1,4 @@
-"""sdr edit <thing>: bulk edits, each mapped to an Argo bulk action.
+"""argo edit <thing>: bulk edits, each mapped to an Argo bulk action.
 
 Since October 2025, edit bulk actions open new versions automatically and
 (for most actions) can close them afterwards. --keep-open covers the cases
@@ -20,7 +20,7 @@ OCR_MAX_DRUIDS = 100  # guide: no more than 100 druids / 500 GB per OCR bulk act
 
 def _start(name: str, targets: tuple[str, ...]) -> list[str]:
     druids = collect_druids(targets)
-    console.rule(f"[bold]sdr edit {name}[/] · {len(druids)} object(s)")
+    console.rule(f"[bold]argo edit {name}[/] · {len(druids)} object(s)")
     return druids
 
 
@@ -51,7 +51,7 @@ def ocr(targets, languages):
     """Run OCR (text extraction) on accessioned image or book items.
 
     \b
-    Example:  sdr edit ocr druids.txt --lang English
+    Example:  argo edit ocr druids.txt --lang English
     """
     bad = [lang for lang in languages if lang.lower() in OCR_UNSUPPORTED]
     if bad:
@@ -154,7 +154,7 @@ def tags(tags_csv):
     Example row:  druid:bc123df4567,Project : Maps,Format : Atlas
     """
     rows = [ln for ln in tags_csv.read_text().splitlines() if ln.strip()]
-    console.rule(f"[bold]sdr edit tags[/] · {len(rows)} row(s)")
+    console.rule(f"[bold]argo edit tags[/] · {len(rows)} row(s)")
     fake_progress("Importing tags", [r.split(",")[0] for r in rows])
     would_have(
         "edit.tags",
@@ -207,9 +207,9 @@ def descriptive(targets, export_path, validate_path, import_path, keep_open):
     """Round-trip descriptive metadata through a spreadsheet.
 
     \b
-    sdr edit descriptive druids.txt --export desc.csv   # edit in Excel…
-    sdr edit descriptive --validate desc.csv
-    sdr edit descriptive --import desc.csv
+    argo edit descriptive druids.txt --export desc.csv   # edit in Excel…
+    argo edit descriptive --validate desc.csv
+    argo edit descriptive --import desc.csv
     """
     if sum(bool(x) for x in (export_path, validate_path, import_path)) != 1:
         raise click.UsageError("choose exactly one of --export, --validate, --import")
@@ -221,14 +221,14 @@ def descriptive(targets, export_path, validate_path, import_path, keep_open):
             f"Saved one row per object, with Cocina description flattened to columns, to [cyan]{export_path}[/].",
         ]
     elif validate_path:
-        console.rule("[bold]sdr edit descriptive --validate[/]")
+        console.rule("[bold]argo edit descriptive --validate[/]")
         fake_steps(["Reading spreadsheet", "Validating each row against Cocina"])
         actions = [
             "Submitted [bold]Validate descriptive metadata spreadsheet[/].",
             f"Reported any row in [cyan]{validate_path}[/] that would produce invalid Cocina. No objects changed.",
         ]
     else:
-        console.rule("[bold]sdr edit descriptive --import[/]")
+        console.rule("[bold]argo edit descriptive --import[/]")
         fake_steps(["Reading spreadsheet", "Validating against Cocina", "Diffing against current metadata"])
         actions = [
             "Submitted [bold]Upload descriptive metadata spreadsheet[/].",

@@ -1,0 +1,7 @@
+druid,filename,resource_label,sequence,publish,shelve,preserve,resource_type,role,file_language
+bb111cc2222,bb111cc2222_interview_pm.mov,Video file,1,no,yes,yes,video,,
+bb111cc2222,bb111cc2222_interview_sl.mp4,Video,1,yes,yes,yes,video,,
+bb111cc2222,bb111cc2222_interview_en.srt,Video file,1,yes,yes,yes,video,caption,English
+bb111cc2222,bb111cc2222_interview_sl.mp4.md5,Video file,1,no,no,yes,video,,
+bb111cc2222,bb111cc2222_transcript.pdf,Transcript,3,yes,yes,maybe,file,ocr,
+dd333ff4444,dd333ff4444_side_a_sl.m4a,Side A,2,yes,yes,yes,audio,,

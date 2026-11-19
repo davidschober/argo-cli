@@ -83,7 +83,7 @@ DOCS["accession.file-manifest"] = [
     sdr(1812791949, "Accessioning images with captions (labels)"),
 ] + DOCS["accession"]
 
-# Shown in `sdr edit --help` and appended to every edit panel.
+# Shown in `argo edit --help` and appended to every edit panel.
 EDIT_COMMON = [
     sdr(1638465944, "About Argo bulk actions"),
     VERSIONS,

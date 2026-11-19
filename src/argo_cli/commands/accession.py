@@ -1,4 +1,4 @@
-"""sdr accession: accession registered druids through Preassembly.
+"""argo accession: accession registered druids through Preassembly.
 
 Follows SDR User Guide > Accessioning > Preassembly: stage one folder per
 druid, write a manifest.csv (druid,object), fill in the webform, run a
@@ -65,12 +65,12 @@ def accession(targets, project_name, content_type, staging, file_manifest, ocr, 
     \b
     Examples:
       # simple book batch with OCR
-      sdr accession examples/accession.csv --project-name rumsey_batch_7 \\
+      argo accession examples/accession.csv --project-name rumsey_batch_7 \\
           --content-type book --staging /dor/staging/rumsey/batch7 --ocr --lang English
 
     \b
       # complex media: file manifest controls resources, labels, order, purl vs preservation
-      sdr accession examples/accession_with_file_manifest.csv --project-name oral_hist_2026 \\
+      argo accession examples/accession_with_file_manifest.csv --project-name oral_hist_2026 \\
           --content-type media --staging /dor/staging/oralhist \\
           --file-manifest examples/file_manifest.csv
     """
@@ -104,7 +104,7 @@ def accession(targets, project_name, content_type, staging, file_manifest, ocr, 
             raise click.UsageError(f"with a file manifest, folders must be named after druids; "
                                    f"'{renamed[0][1]}' is used for {renamed[0][0]}")
         fm = load_and_validate(file_manifest, [d for d, _ in pairs])
-    console.rule(f"[bold]sdr accession[/] · {project_name} · {len(pairs)} object(s) · {content_type}")
+    console.rule(f"[bold]argo accession[/] · {project_name} · {len(pairs)} object(s) · {content_type}")
 
     manifest = "druid,object\n" + "\n".join(f"{d},{o}" for d, o in pairs)
     console.print("[bold]manifest.csv[/] (would be written to the staging root):")

@@ -1,0 +1,8 @@
+druid,filename,resource_label,sequence,publish,shelve,preserve,resource_type,role,file_language
+jj123kk4567,jj123kk4567_front.tif,Front cover,1,yes,yes,yes,image,,
+jj123kk4567,jj123kk4567_plate_01.tif,Plate 1: San Francisco Bay,2,yes,yes,yes,image,,
+jj123kk4567,jj123kk4567_plate_02.tif,Plate 2: Monterey,3,yes,yes,yes,image,,
+jj123kk4567,jj123kk4567_back.tif,Back cover,4,yes,yes,yes,image,,
+jj123kk4567,jj123kk4567_condition_report.pdf,Condition report,5,no,no,yes,file,,
+mm234nn5678,mm234nn5678_recto.tif,Recto,1,yes,yes,yes,image,,
+mm234nn5678,mm234nn5678_verso.tif,Verso (inscription),2,yes,yes,yes,image,,
